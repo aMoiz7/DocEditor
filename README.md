@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ajaia Docs
 
-## Getting Started
+A focused collaborative document editor built with Next.js, TypeScript, and PostgreSQL. It demonstrates create, rename, rich-text edit, save/reopen, text/Markdown import, and seeded-user sharing.
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm install
+copy .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+On Windows, run `.\RUN.ps1` for the same flow. It checks Node.js/npm, creates a missing `.env.local` from the template, installs dependencies when needed, and starts the development server.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open http://localhost:3000. PostgreSQL is required; the app intentionally fails with a clear error if `DATABASE_URL` is missing. The first request creates the tables and seeds three review users automatically. You can also run `database.sql` manually. Set:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/ajaia_docs
+DATABASE_SSL=false
+```
 
-## Learn More
+Choose a seeded user on the login screen. The selected user is stored in an HTTP-only cookie and every document operation checks ownership or sharing access. Imports support `.txt` and `.md` only, are stored in the `attachments` table, and replace the active document body. Use the Share dropdown to grant access; shared documents are shown separately in the sidebar. Use **Export .md** to download Markdown or **Export PDF** to open the browser print dialog and choose “Save as PDF”. The `•••` menu copies a document link and lets owners delete documents.
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `npm run dev` — local development
+- `npm run build` — production build/type check
+- `npm run lint` — ESLint
+- `npm test` — schema smoke test
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy with Vercel + Neon
 
-## Deploy on Vercel
+1. Create a Neon PostgreSQL database and copy its pooled `DATABASE_URL`.
+2. Import this repository into Vercel.
+3. In Vercel Project Settings → Environment Variables, add `DATABASE_URL` and set `DATABASE_SSL=true`.
+4. Deploy. The first request runs the idempotent schema/seed initialization.
+5. Test the login with Alex Morgan, create a document, import a `.txt` file, and share it with Priya Shah.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Do not commit `.env.local` or database credentials. Add the live URL to `SUBMISSION.md` after deployment.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Scope and next steps
+
+This submission uses seeded users instead of full authentication, HTML content instead of a document AST, and last-write-wins saves instead of real-time collaboration. Next steps would be authentication, a structured editor such as Tiptap, optimistic conflict handling/version history, and hosted Postgres migrations/seeding.
